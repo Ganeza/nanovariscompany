@@ -566,6 +566,9 @@
     .bubble.bot { background: rgba(255,255,255,0.06); }
     .chat-input { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
     .chat-input input { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--text); }
+    canvas#microCanvas { width: 100%; height: 300px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+    .micro-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    @media (max-width: 1000px) { .micro-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -580,6 +583,7 @@
         <a href="#materials">Nanomaterials</a>
         <a href="#lab">Material Lab</a>
         <a href="#webgl">3D Lattice</a>
+        <a href="#microscope">Microscope</a>
         <a href="#spectral">Spectral Lab</a>
         <a href="#scenario">Scenarios</a>
         <a href="#diagnostics">Diagnostics</a>
@@ -807,6 +811,27 @@
             <div class="slider"><label for="bond">Bond Strength</label><input id="bond" type="range" min="1" max="10" value="5" /></div>
           </div>
           <p class="muted" style="margin-top:10px;">GPU‑accelerated lattice visualization for ‑level impact.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="microscope">
+      <div class="section-title">
+        <h2>AI Material Microscope</h2>
+        <span>Live defect heatmap + saliency overlay</span>
+      </div>
+      <div class="micro-grid">
+        <div class="card">
+          <canvas id="microCanvas" width="980" height="300"></canvas>
+        </div>
+        <div class="card">
+          <h3>Microscope Controls</h3>
+          <div class="sliders">
+            <div class="slider"><label for="microZoom">Zoom</label><input id="microZoom" type="range" min="1" max="6" value="3" /></div>
+            <div class="slider"><label for="microNoise">Noise</label><input id="microNoise" type="range" min="0" max="10" value="4" /></div>
+            <div class="slider"><label for="microSal">Saliency</label><input id="microSal" type="range" min="0" max="10" value="6" /></div>
+          </div>
+          <p class="muted" style="margin-top:8px;">Simulated microscope view with AI saliency overlay for defect localization.</p>
         </div>
       </div>
     </section>
@@ -2122,6 +2147,41 @@ Score: ${(a.score-b.score).toFixed(2)}`;
     chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleChat(); });
 
     addBubble('Hi! Ask me about yield, defects, ROI, pilots, or materials.', 'bot');
+
+    // Material Microscope
+    const microCanvas = document.getElementById('microCanvas');
+    const mctx = microCanvas.getContext('2d');
+    const microZoom = document.getElementById('microZoom');
+    const microNoise = document.getElementById('microNoise');
+    const microSal = document.getElementById('microSal');
+
+    function drawMicro(){
+      const w = microCanvas.width, h = microCanvas.height;
+      mctx.clearRect(0,0,w,h);
+      const zoom = +microZoom.value;
+      const noise = +microNoise.value;
+      const sal = +microSal.value;
+      for (let y=0; y<h; y+=4){
+        for (let x=0; x<w; x+=4){
+          const v = (Math.sin((x+y)/50*zoom)+Math.cos(x/30)+Math.sin(y/40))*0.5;
+          const n = (Math.random()-0.5)*noise*0.06;
+          const intensity = Math.max(0, Math.min(1, 0.5+v*0.25+n));
+          mctx.fillStyle = `rgba(126,227,255,${0.15+intensity*0.5})`;
+          mctx.fillRect(x,y,4,4);
+        }
+      }
+      // saliency overlay
+      mctx.strokeStyle = `rgba(255,216,111,${0.1+sal*0.04})`;
+      for (let i=0;i<12;i++){
+        const cx = (i*83+performance.now()*0.02) % w;
+        const cy = (i*53+performance.now()*0.03) % h;
+        mctx.beginPath();
+        mctx.arc(cx, cy, 20+sal*2, 0, Math.PI*2);
+        mctx.stroke();
+      }
+      requestAnimationFrame(drawMicro);
+    }
+    drawMicro();
   </script>
 </body>
 </html>
