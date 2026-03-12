@@ -1,0 +1,2127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nanovaris AI Materials Engine</title>
+  <style>
+    :root {
+      --bg: #0a0c12;
+      --bg-2: #0f141f;
+      --panel: rgba(15, 22, 35, 0.82);
+      --panel-2: rgba(10, 16, 28, 0.9);
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #eef2ff;
+      --muted: #a6b2c9;
+      --accent: #7ee3ff;
+      --accent-2: #ffd86f;
+      --accent-3: #7ff4c7;
+      --warn: #ffb2b2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "Space Grotesk", "Avenir Next", "SF Pro Display", sans-serif;
+      background:
+        radial-gradient(900px 500px at 12% 10%, #1c2a48 0%, transparent 45%),
+        radial-gradient(900px 500px at 90% 20%, #2a1c36 0%, transparent 44%),
+        linear-gradient(140deg, #080b12, var(--bg), var(--bg-2));
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrap {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(12px);
+      background: rgba(8, 12, 18, 0.6);
+      border-bottom: 1px solid var(--line);
+      z-index: 10;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+
+    .logo-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      background: conic-gradient(from 120deg, #7ee3ff, #7ff4c7, #ffd86f, #7ee3ff);
+      box-shadow: 0 0 18px rgba(126, 227, 255, 0.35);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .cta {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(126, 227, 255, 0.45);
+      background: rgba(126, 227, 255, 0.08);
+      font-size: 0.9rem;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      padding: 56px 0 40px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 3.8vw, 3.6rem);
+      margin: 0 0 12px;
+      line-height: 1.05;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.6;
+      margin: 0 0 20px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .primary {
+      background: linear-gradient(120deg, rgba(126, 227, 255, 0.24), rgba(127, 244, 199, 0.24));
+      border: 1px solid rgba(126, 227, 255, 0.45);
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .secondary {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+      padding: 12px 18px;
+      border-radius: 12px;
+    }
+
+    .hero-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .hero-card .stat {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 10px;
+    }
+
+    .hero-card .stat:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .stat .label { color: var(--muted); font-size: 0.82rem; }
+    .stat .value { font-size: 1.1rem; font-weight: 600; }
+
+    section { padding: 32px 0; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-title h2 { margin: 0; font-size: 1.6rem; }
+    .section-title span { color: var(--muted); font-size: 0.9rem; }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.76rem;
+      color: #e9f6ff;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(126, 227, 255, 0.3);
+      background: rgba(126, 227, 255, 0.08);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .flow .node {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.02);
+      font-size: 0.85rem;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .kpi .value { font-size: 1.2rem; font-weight: 700; }
+    .kpi .label { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+    .ai-stack {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
+
+    .mono { font-family: "IBM Plex Mono", "SF Mono", monospace; font-size: 0.78rem; color: #d0ddf2; white-space: pre-line; }
+
+    .engine-demo {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .sliders {
+      display: grid;
+      gap: 12px;
+    }
+
+    .slider {
+      display: grid;
+      gap: 6px;
+    }
+
+    .slider label { font-size: 0.85rem; color: var(--muted); }
+    input[type="range"] { width: 100%; }
+
+    .engine-readout {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .readout {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .readout .value { font-size: 1.1rem; font-weight: 700; }
+    .readout .label { font-size: 0.75rem; color: var(--muted); }
+
+    canvas#engineCanvas {
+      width: 100%;
+      aspect-ratio: 16/10;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: linear-gradient(150deg, rgba(26, 40, 64, 0.5), rgba(9, 14, 26, 0.9));
+      display: block;
+    }
+
+    canvas#historyCanvas {
+      width: 100%;
+      height: 240px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    button {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:hover { background: rgba(255,255,255,0.12); }
+
+    .history-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      color: #e6f6ff;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(126, 227, 255, 0.3);
+      background: rgba(126, 227, 255, 0.08);
+    }
+
+    .vault {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    video, canvas#captureCanvas {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .gallery img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+    }
+
+    .materials {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .materials-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .material-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+    }
+
+    .material-card.active {
+      border-color: rgba(126, 227, 255, 0.55);
+      box-shadow: 0 0 16px rgba(126, 227, 255, 0.2);
+    }
+
+    .material-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .structure {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    canvas#structureCanvas {
+      width: 100%;
+      height: 280px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 22px 0 40px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .reveal { animation: fadeUp 0.9s ease both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1000px) {
+      .hero { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .ai-stack { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .engine-demo { grid-template-columns: 1fr; }
+      .vault { grid-template-columns: 1fr; }
+      .materials { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .gallery { grid-template-columns: 1fr; }
+    }
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .tab {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .tab.active {
+      color: var(--text);
+      border-color: rgba(126,227,255,0.5);
+      box-shadow: 0 0 12px rgba(126,227,255,0.2);
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 16px;
+    }
+
+    .roi-output {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .checkbox-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .steps {
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+    }
+
+    .step.active {
+      border-color: rgba(127,244,199,0.6);
+      box-shadow: 0 0 12px rgba(127,244,199,0.2);
+    }
+
+    .vision-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+    @media (max-width: 1000px) {
+      .roi-grid { grid-template-columns: 1fr; }
+      .vision-grid { grid-template-columns: 1fr; }
+    }
+    .scenario-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .scenario-btn { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,0.04); font-size: 0.8rem; color: var(--muted); cursor: pointer; }
+    .scenario-btn.active { color: var(--text); border-color: rgba(126,227,255,0.5); box-shadow: 0 0 12px rgba(126,227,255,0.2); }
+
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .compare-card { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: rgba(255,255,255,0.02); }
+
+    .diagnostics { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    canvas#diagCanvas { width: 100%; height: 260px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal .panel {
+      width: min(720px, 90vw); background: #0d1320; border: 1px solid var(--line); border-radius: 16px; padding: 16px;
+    }
+    .modal .panel h3 { margin-top: 0; }
+    .modal .panel pre { white-space: pre-wrap; font-family: "IBM Plex Mono", monospace; font-size: 0.82rem; color: #d9e6ff; }
+
+    @media (max-width: 1000px) { .compare-grid { grid-template-columns: 1fr; } .diagnostics { grid-template-columns: 1fr; } }
+    .lab-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    canvas#labCanvas { width: 100%; height: 360px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+    .lab-readout { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    .gnn {
+      border-radius: 14px; border: 1px solid var(--line); padding: 10px; background: rgba(255,255,255,0.02);
+    }
+    canvas#gnnCanvas { width: 100%; height: 220px; border-radius: 10px; }
+    @media (max-width: 1000px) { .lab-grid { grid-template-columns: 1fr; } }
+    .hero { position: relative; }
+    #heroParticles { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6; }
+    .hero > * { position: relative; z-index: 1; }
+
+    .ensemble {
+      display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px;
+    }
+    canvas#ensembleCanvas { width: 100%; height: 240px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+    @media (max-width: 1000px) { .ensemble { grid-template-columns: 1fr; } }
+    .training { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    canvas#trainCanvas { width: 100%; height: 260px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+    .train-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .pitch {
+      position: fixed; right: 16px; bottom: 16px; z-index: 120;
+      border-radius: 999px; padding: 10px 16px; border: 1px solid rgba(126,227,255,0.5);
+      background: rgba(126,227,255,0.12);
+    }
+    .spotlight { outline: 2px solid rgba(126,227,255,0.5); box-shadow: 0 0 24px rgba(126,227,255,0.25); }
+    @media (max-width: 1000px) { .training { grid-template-columns: 1fr; } }
+    html { scroll-behavior: smooth; }
+    section { scroll-margin-top: 90px; }
+
+    .nav-links a:hover, .nav-links a:focus { color: var(--text); }
+    .tab:hover { color: var(--text); border-color: rgba(126,227,255,0.5); box-shadow: 0 0 12px rgba(126,227,255,0.2); }
+    canvas#webglCanvas { width: 100%; height: 360px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,0.02); }
+    .webgl-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    @media (max-width: 1000px) { .webgl-grid { grid-template-columns: 1fr; } }
+    .chatbox {
+      display: grid; grid-template-rows: auto 1fr auto; gap: 10px;
+      border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: rgba(255,255,255,0.02);
+      min-height: 360px;
+    }
+    .chat-log { overflow: auto; max-height: 320px; display: grid; gap: 8px; }
+    .bubble { padding: 8px 12px; border-radius: 12px; font-size: 0.92rem; line-height: 1.4; }
+    .bubble.user { background: rgba(126,227,255,0.18); justify-self: end; }
+    .bubble.bot { background: rgba(255,255,255,0.06); }
+    .chat-input { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .chat-input input { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,0.03); color: var(--text); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="logo"><span class="logo-mark"></span> Nanovaris AI Engine</div>
+      <nav class="nav-links">
+        <a href="#engine">AI Engine</a>
+        <a href="#demo">Live Demo</a>
+        <a href="#training">Training</a>
+        <a href="#ensemble">Ensemble</a>
+        <a href="#materials">Nanomaterials</a>
+        <a href="#lab">Material Lab</a>
+        <a href="#webgl">3D Lattice</a>
+        <a href="#spectral">Spectral Lab</a>
+        <a href="#scenario">Scenarios</a>
+        <a href="#diagnostics">Diagnostics</a>
+        <a href="#compare">Compare</a>
+        <a href="#vision">Vision</a>
+        <a href="#roi">ROI</a>
+        <a href="#pilot">Pilot</a>
+        <a href="#compliance">Compliance</a>
+        <a href="#vault">Agreements</a>
+        <a href="#chat">Chatbot</a>
+        <a href="#metrics">Metrics</a>
+      </nav>
+      <a class="cta" href="#contact">Request Pilot</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <canvas id="heroParticles" width="1400" height="600"></canvas>
+      <div class="reveal">
+        <h1>AI‑First Materials Discovery for Defect‑Free Hardware</h1>
+        <p>Nanovaris uses a closed‑loop AI engine to design, simulate, and validate nanomaterials that remove micro‑defects in advanced hardware. Our platform compresses discovery timelines and delivers fabrication‑ready materials that scale across AI chips, robotics, and advanced electronics.</p>
+        <div class="hero-actions">
+          <a class="primary" href="#demo">Run Live Optimization</a>
+          <a class="secondary" href="#engine">Explore the AI Engine</a>
+        </div>
+      </div>
+      <div class="tabs" id="tabs">
+        <a class="tab" href="#engine">Engine</a>
+        <a class="tab" href="#demo">Live Demo</a>
+        <a class="tab" href="#materials">Materials</a>
+        <a class="tab" href="#vision">Vision</a>
+        <a class="tab" href="#roi">ROI</a>
+        <a class="tab" href="#pilot">Pilot</a>
+        <a class="tab" href="#compliance">Compliance</a>
+        <a class="tab" href="#vault">Agreements</a>
+      </div>
+      <div class="hero-card reveal">
+        <div class="stat"><div class="label">Discovery Cycle</div><div class="value">Weeks, not years</div></div>
+        <div class="stat"><div class="label">Defect Reduction Target</div><div class="value">Up to 30%</div></div>
+        <div class="stat"><div class="label">Gross Margin Potential</div><div class="value">68% → 72%</div></div>
+        <div class="stat"><div class="label">Enterprise Retention</div><div class="value">92% (modeled)</div></div>
+      </div>
+    </section>
+
+    <section id="engine">
+      <div class="section-title">
+        <h2>Nanovaris AI Engine</h2>
+        <span>Closed‑loop discovery → synthesis → validation</span>
+      </div>
+      <div class="flow">
+        <div class="node">Data Ingestion<br><span class="muted">Fab logs, material metrics, defect heatmaps</span></div>
+        <div class="node">Generative Materials<br><span class="muted">Physics‑guided, multi‑objective design</span></div>
+        <div class="node">Synthesis + Test<br><span class="muted">Rapid validation, quality screening</span></div>
+        <div class="node">Optimization Loop<br><span class="muted">Feedback retrains models continuously</span></div>
+      </div>
+    </section>
+
+    <section id="demo">
+      <div class="section-title">
+        <h2>Live AI Optimization Demo</h2>
+        <span>Interactive, real‑time simulation of defect reduction</span>
+      </div>
+      <div class="engine-demo">
+        <div class="card">
+          <h3>Optimization Controls</h3>
+          <div class="sliders">
+            <div class="slider">
+              <label for="purity">Material Purity Target</label>
+              <input id="purity" type="range" min="80" max="99" value="94" />
+            </div>
+            <div class="slider">
+              <label for="temp">Synthesis Temperature (°C)</label>
+              <input id="temp" type="range" min="300" max="900" value="620" />
+            </div>
+            <div class="slider">
+              <label for="pressure">Chamber Pressure (Pa)</label>
+              <input id="pressure" type="range" min="10" max="120" value="48" />
+            </div>
+            <div class="slider">
+              <label for="iterations">Optimization Iterations</label>
+              <input id="iterations" type="range" min="20" max="180" value="80" />
+            </div>
+          </div>
+          <div class="engine-readout">
+            <div class="readout"><div class="value" id="defect">12.4%</div><div class="label">Predicted Defect Rate</div></div>
+            <div class="readout"><div class="value" id="yield">86.1%</div><div class="label">Projected Yield</div></div>
+            <div class="readout"><div class="value" id="cost">$2.1M</div><div class="label">Batch Cost Impact</div></div>
+            <div class="readout"><div class="value" id="score">0.78</div><div class="label">AI Confidence Score</div></div>
+          </div>
+          <div class="actions">
+            <button id="run">Run Optimization</button>
+            <button id="save">Save Run</button>
+            <button id="download">Download CSV</button>
+            <button id="reset">Reset</button>
+          </div>
+          <p class="muted" style="margin-top:10px;">Demo uses weighted multi‑objective scoring to simulate defect minimization and yield gains.</p>
+        </div>
+        <div class="card">
+          <h3>Defect Surface Map</h3>
+          <canvas id="engineCanvas" width="900" height="560"></canvas>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="section-title" style="margin-bottom:8px;">
+          <h3>Run History</h3>
+          <span class="tag" id="runCount">0 saved</span>
+        </div>
+        <canvas id="historyCanvas" width="1100" height="240"></canvas>
+        <p class="muted" style="margin-top:6px;">Tracks defect rate and yield across saved runs for side‑by‑side comparison.</p>
+      </div>
+    </section>
+
+    <section id="training">
+      <div class="section-title">
+        <h2>AI Training Command Center</h2>
+        <span>Live loss curves, GPU utilization, and batch health</span>
+      </div>
+      <div class="training">
+        <div class="card">
+          <h3>Loss + Accuracy</h3>
+          <canvas id="trainCanvas" width="1000" height="260"></canvas>
+        </div>
+        <div class="card">
+          <h3>Live System Telemetry</h3>
+          <div class="train-grid">
+            <div class="readout"><div class="value" id="gpu">78%</div><div class="label">GPU Utilization</div></div>
+            <div class="readout"><div class="value" id="vr">14.2 GB</div><div class="label">VRAM</div></div>
+            <div class="readout"><div class="value" id="queue">24</div><div class="label">Jobs In Queue</div></div>
+            <div class="readout"><div class="value" id="batch">0.92</div><div class="label">Batch Health</div></div>
+          </div>
+          <p class="muted" style="margin-top:10px;">Simulated training loop for demo. Uses live noise to mimic real‑world training volatility.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ensemble">
+      <div class="section-title">
+        <h2>Model Ensemble Studio</h2>
+        <span>Blend model weights to maximize performance</span>
+      </div>
+      <div class="ensemble">
+        <div class="card">
+          <h3>Ensemble Weights</h3>
+          <div class="sliders">
+            <div class="slider"><label for="wGNN">GNN Weight</label><input id="wGNN" type="range" min="0" max="100" value="45" /></div>
+            <div class="slider"><label for="wDiff">Diffusion Weight</label><input id="wDiff" type="range" min="0" max="100" value="35" /></div>
+            <div class="slider"><label for="wBayes">Bayesian Weight</label><input id="wBayes" type="range" min="0" max="100" value="20" /></div>
+          </div>
+          <p class="muted" style="margin-top:10px;">Weights update AI confidence and defect predictions in real time.</p>
+        </div>
+        <div class="card">
+          <h3>Ensemble Response</h3>
+          <canvas id="ensembleCanvas" width="900" height="240"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="materials">
+      <div class="section-title">
+        <h2>Nanomaterial Candidates (Simulated)</h2>
+        <span>Generated from current optimization controls</span>
+      </div>
+      <div class="materials">
+        <div class="card">
+          <h3>Candidate Library</h3>
+          <div class="materials-list" id="materialsList"></div>
+          <div class="actions">
+            <button id="regen">Regenerate Candidates</button>
+            <button id="exportMaterials">Export JSON</button>
+          </div>
+          <p class="muted" style="margin-top:6px;">Candidates are AI‑generated simulations for demonstration.</p>
+        </div>
+        <div class="card structure">
+          <h3>Material Profile</h3>
+          <div id="materialProfile" class="mono">Select a candidate to view composition and predicted properties.</div>
+          <canvas id="structureCanvas" width="900" height="280"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section id="lab">
+      <div class="section-title">
+        <h2>Nanomaterial Tinker Lab</h2>
+        <span>Drag atoms, tune impurities, and watch AI stability scores update</span>
+      </div>
+      <div class="lab-grid">
+        <div class="card">
+          <h3>Lattice Editor</h3>
+          <canvas id="labCanvas" width="980" height="360"></canvas>
+          <div class="sliders">
+            <div class="slider"><label for="impurity">Impurity Density</label><input id="impurity" type="range" min="0" max="30" value="8" /></div>
+            <div class="slider"><label for="strain">Lattice Strain</label><input id="strain" type="range" min="0" max="20" value="6" /></div>
+            <div class="slider"><label for="defectMap">Defect Noise</label><input id="defectMap" type="range" min="0" max="20" value="7" /></div>
+          </div>
+          <div class="lab-readout">
+            <div class="readout"><div class="value" id="labDefect">7.2%</div><div class="label">Defect Score</div></div>
+            <div class="readout"><div class="value" id="labStability">91.4%</div><div class="label">Stability</div></div>
+            <div class="readout"><div class="value" id="labThermal">88.6%</div><div class="label">Thermal Resilience</div></div>
+            <div class="readout"><div class="value" id="labConfidence">0.81</div><div class="label">AI Confidence</div></div>
+          </div>
+        </div>
+        <div class="card gnn">
+          <h3>Graph Neural Model (Live)</h3>
+          <canvas id="gnnCanvas" width="900" height="220"></canvas>
+          <p class="muted" style="margin-top:6px;">Node activations pulse as the model evaluates the lattice in real time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="webgl">
+      <div class="section-title">
+        <h2>3D Lattice Viewer (WebGL)</h2>
+        <span>Real‑time 3D nanomaterial lattice simulation</span>
+      </div>
+      <div class="webgl-grid">
+        <div class="card">
+          <canvas id="webglCanvas" width="980" height="360"></canvas>
+        </div>
+        <div class="card">
+          <h3>3D Controls</h3>
+          <div class="sliders">
+            <div class="slider"><label for="spin">Rotation Speed</label><input id="spin" type="range" min="1" max="20" value="8" /></div>
+            <div class="slider"><label for="density">Node Density</label><input id="density" type="range" min="40" max="160" value="90" /></div>
+            <div class="slider"><label for="bond">Bond Strength</label><input id="bond" type="range" min="1" max="10" value="5" /></div>
+          </div>
+          <p class="muted" style="margin-top:10px;">GPU‑accelerated lattice visualization for ‑level impact.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="spectral">
+      <div class="section-title">
+        <h2>Spectral & Phase Lab</h2>
+        <span>Interactive property spectra and phase stability</span>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Bandgap Spectral Analyzer</h3>
+          <canvas id="spectralCanvas" width="980" height="280"></canvas>
+          <div class="sliders">
+            <div class="slider"><label for="dopant">Dopant Ratio</label><input id="dopant" type="range" min="0" max="20" value="6" /></div>
+            <div class="slider"><label for="grain">Grain Size (nm)</label><input id="grain" type="range" min="5" max="80" value="30" /></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Phase Stability Map</h3>
+          <canvas id="phaseCanvas" width="980" height="280"></canvas>
+          <div class="sliders">
+            <div class="slider"><label for="temp2">Anneal Temp (°C)</label><input id="temp2" type="range" min="300" max="900" value="650" /></div>
+            <div class="slider"><label for="cool">Cooling Rate</label><input id="cool" type="range" min="1" max="20" value="8" /></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scenario">
+      <div class="section-title">
+        <h2>Scenario Switcher</h2>
+        <span>Click to re‑scope model assumptions</span>
+      </div>
+      <div class="card">
+        <div class="scenario-tabs" id="scenarioTabs">
+          <button class="scenario-btn active" data-scope="semis">Semiconductors</button>
+          <button class="scenario-btn" data-scope="robotics">Robotics</button>
+          <button class="scenario-btn" data-scope="datacenter">Data Centers</button>
+        </div>
+        <p class="muted" id="scenarioText" style="margin-top:10px;">Active: Semiconductors — high yield sensitivity, strict defect thresholds.</p>
+      </div>
+    </section>
+
+    <section id="diagnostics">
+      <div class="section-title">
+        <h2>Model Diagnostics</h2>
+        <span>Live confidence + loss tracking (simulated)</span>
+      </div>
+      <div class="diagnostics">
+        <div class="card">
+          <h3>Confidence Over Iterations</h3>
+          <canvas id="diagCanvas" width="900" height="260"></canvas>
+        </div>
+        <div class="card">
+          <h3>Explainability Snapshot</h3>
+          <div class="mono" id="xaiText">Top drivers will appear after run optimization.</div>
+          <div class="actions" style="margin-top:10px;">
+            <button id="xaiBtn">Generate Explainability</button>
+            <button id="reportBtn">Generate Executive Report</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare">
+      <div class="section-title">
+        <h2>Material Comparison</h2>
+        <span>Side‑by‑side candidate analysis</span>
+      </div>
+      <div class="compare-grid">
+        <div class="compare-card">
+          <h3>Candidate A</h3>
+          <select id="compareA"></select>
+          <pre class="mono" id="compareAText"></pre>
+        </div>
+        <div class="compare-card">
+          <h3>Candidate B</h3>
+          <select id="compareB"></select>
+          <pre class="mono" id="compareBText"></pre>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px;">
+        <h3>Delta Analysis</h3>
+        <pre class="mono" id="compareDelta">Select two candidates.</pre>
+      </div>
+    </section>
+
+    <section id="vision">
+      <div class="section-title">
+        <h2>Strategic Vision</h2>
+        <span>Roadmap from science to product to scale</span>
+      </div>
+      <div class="vision-grid">
+        <div class="card"><span class="pill">Phase 1</span><h3>Materials Intelligence Core</h3><p>Build proprietary datasets, defect fingerprinting, and physics‑guided optimization layers.</p></div>
+        <div class="card"><span class="pill">Phase 2</span><h3>Qualification Engine</h3><p>Automated validation workflows for OEM qualification and repeatable pilot conversion.</p></div>
+        <div class="card"><span class="pill">Phase 3</span><h3>Enterprise Scale</h3><p>Multi‑site rollout with licensing + consumables for recurring revenue.</p></div>
+      </div>
+    </section>
+
+    <section id="roi">
+      <div class="section-title">
+        <h2>Enterprise ROI Simulator</h2>
+        <span>Quantify yield lift and cost reduction</span>
+      </div>
+      <div class="roi-grid">
+        <div class="card">
+          <h3>Inputs</h3>
+          <div class="sliders">
+            <div class="slider"><label for="annual">Annual Production Value (USD)</label><input id="annual" type="range" min="100" max="3000" value="1200" /></div>
+            <div class="slider"><label for="baseline">Baseline Yield (%)</label><input id="baseline" type="range" min="60" max="95" value="82" /></div>
+            <div class="slider"><label for="lift">Nanovaris Yield Lift (%)</label><input id="lift" type="range" min="2" max="30" value="12" /></div>
+            <div class="slider"><label for="savings">Unit Cost Reduction (%)</label><input id="savings" type="range" min="1" max="20" value="6" /></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Outputs</h3>
+          <div class="roi-output">
+            <div class="readout"><div class="value" id="roiGain">$0M</div><div class="label">Annual Value Gain</div></div>
+            <div class="readout"><div class="value" id="roiYield">0%</div><div class="label">New Effective Yield</div></div>
+            <div class="readout"><div class="value" id="roiSavings">$0M</div><div class="label">Cost Savings</div></div>
+            <div class="readout"><div class="value" id="roiTotal">$0M</div><div class="label">Total Impact</div></div>
+          </div>
+          <p class="muted" style="margin-top:10px;">Modeled outcomes for ‑level business impact evaluation.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pilot">
+      <div class="section-title">
+        <h2>Pilot Playbook</h2>
+        <span>Click each step to reveal scope and outputs</span>
+      </div>
+      <div class="steps" id="pilotSteps">
+        <div class="step" data-detail="Data ingestion + baseline defect mapping">1. Baseline Diagnostic</div>
+        <div class="step" data-detail="AI candidate generation + simulation">2. Candidate Generation</div>
+        <div class="step" data-detail="Pilot synthesis + QA validation">3. Synthesis & QA</div>
+        <div class="step" data-detail="Yield comparison + ROI report">4. Impact Report</div>
+      </div>
+      <p class="muted" id="pilotDetail" style="margin-top:10px;">Select a step to view details.</p>
+    </section>
+
+    <section id="compliance">
+      <div class="section-title">
+        <h2>Compliance & Risk Controls</h2>
+        <span>Audit‑ready practices for enterprise deployment</span>
+      </div>
+      <div class="checkbox-list">
+        <label class="checkbox"><input type="checkbox" checked /> ISO‑aligned QA workflow</label>
+        <label class="checkbox"><input type="checkbox" checked /> Chain‑of‑custody for materials batches</label>
+        <label class="checkbox"><input type="checkbox" checked /> Third‑party validation and certifications</label>
+        <label class="checkbox"><input type="checkbox" /> Export control review for advanced materials</label>
+      </div>
+    </section>
+
+    <section id="vault">
+      <div class="section-title">
+        <h2>Investor Agreement Vault</h2>
+        <span>Capture signatures directly in the browser (stored locally)</span>
+      </div>
+      <div class="vault">
+        <div class="card">
+          <h3>Capture Agreement</h3>
+          <video id="camera" autoplay playsinline></video>
+          <canvas id="captureCanvas" width="900" height="560" style="display:none;"></canvas>
+          <div class="actions">
+            <button id="startCam">Start Camera</button>
+            <button id="snap">Capture</button>
+            <button id="saveImage">Save to Vault</button>
+            <button id="stopCam">Stop Camera</button>
+            <label class="cta" style="padding:6px 10px;">
+              Upload Image
+              <input id="upload" type="file" accept="image/*" capture="environment" style="display:none;" />
+            </label>
+          </div>
+          <p class="muted" style="margin-top:8px;">Images are uploaded to Vercel Blob (public) and visible to all users after deployment.</p>
+        </div>
+        <div class="card">
+          <h3>Vault Gallery</h3>
+          <div class="gallery" id="gallery"></div>
+          <div class="actions">
+            <button id="clearVault">Clear Vault</button>
+          </div>
+          <div class="card" style="margin-top:12px;">
+            <h3>Public Gallery (Publishable Data)</h3>
+            <p class="muted">Add images here; they are stored in this browser. To make them public across users, connect a backend storage provider.</p>
+            <div class="actions">
+              <button id="refreshPublic">Refresh</button>
+              <button id="exportVault">Export</button>
+              <button id="importVault">Import</button>
+              <input id="importFile" type="file" accept="application/json" style="display:none;" />
+            </div>
+            <div class="gallery" id="publicGallery" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="stack" class="ai-stack">
+      <div>
+        <div class="section-title">
+          <h2>Model Stack</h2>
+          <span>Scientific AI built for materials performance</span>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <span class="pill">Foundation</span>
+            <h3>Materials Representation Models</h3>
+            <p>Graph‑based encoders learn atomic‑level interactions and predict defect sensitivity across fabrication conditions.</p>
+          </div>
+          <div class="card">
+            <span class="pill">Optimization</span>
+            <h3>Multi‑Objective Generators</h3>
+            <p>Designs candidate materials across yield, reliability, and cost constraints with safety‑aware validation layers.</p>
+          </div>
+          <div class="card">
+            <span class="pill">Verification</span>
+            <h3>Simulation & Stress Testing</h3>
+            <p>High‑fidelity simulations validate durability, thermal response, and defect propagation before synthesis.</p>
+          </div>
+          <div class="card">
+            <span class="pill">Operational</span>
+            <h3>Deployment Analytics</h3>
+            <p>Live performance telemetry feeds the learning loop to improve each generation of materials.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Core Technical Capabilities</h3>
+        <p class="mono">• Physics‑guided learning and multi‑objective optimization
+• Defect fingerprinting and anomaly detection
+• Closed‑loop experimentation control
+• Rapid qualification via automated QA
+• Workflow integration for OEM pipelines</p>
+      </div>
+    </section>
+
+    <section id="chat">
+      <div class="section-title">
+        <h2>Nanovaris AI Chatbot</h2>
+        <span>Ask about materials, pilots, ROI, and model outputs</span>
+      </div>
+      <div class="chatbox" id="chatbox">
+        <div class="muted">Assistant is demo‑mode (no external data). It uses the live model controls on this page.</div>
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-input">
+          <input id="chatInput" placeholder="Ask: What yield can we expect?" />
+          <button id="chatSend">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="metrics">
+      <div class="section-title">
+        <h2>AI Performance Metrics</h2>
+        <span>Modeled metrics aligned to enterprise manufacturing</span>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="value">98%</div><div class="label">Defect‑Free Target Rate</div></div>
+        <div class="kpi"><div class="value">6–10 wks</div><div class="label">Time‑to‑Qualification</div></div>
+        <div class="kpi"><div class="value">35–45%</div><div class="label">Pilot‑to‑Contract Conversion</div></div>
+        <div class="kpi"><div class="value">92%</div><div class="label">Annual Retention (modeled)</div></div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-title">
+        <h2>Request an Enterprise Pilot</h2>
+        <span>Secure evaluation with qualified manufacturing partners</span>
+      </div>
+      <div class="card">
+        <p>Contact: <strong>nanovaris@gmail.com</strong> • <strong>nanovaris.com</strong></p>
+        <p class="muted">We provide a structured pilot: data ingestion, AI‑designed material candidates, fabrication validation, and yield impact analysis.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Nanovaris AI Engine • Confidential Executive Preview</div>
+  </footer>
+<button class="pitch" id="pitchBtn">Pitch Mode</button>
+  <div class="modal" id="reportModal">
+    <div class="panel">
+      <h3>Executive Report (Generated)</h3>
+      <pre id="reportText"></pre>
+      <div class="actions">
+        <button id="copyReport">Copy</button>
+        <button id="closeReport">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    const purity = document.getElementById('purity');
+    const temp = document.getElementById('temp');
+    const pressure = document.getElementById('pressure');
+    const iterations = document.getElementById('iterations');
+
+    const defectEl = document.getElementById('defect');
+    const yieldEl = document.getElementById('yield');
+    const costEl = document.getElementById('cost');
+    const scoreEl = document.getElementById('score');
+
+    const runBtn = document.getElementById('run');
+    const resetBtn = document.getElementById('reset');
+    const saveBtn = document.getElementById('save');
+    const downloadBtn = document.getElementById('download');
+
+    const canvas = document.getElementById('engineCanvas');
+    const ctx = canvas.getContext('2d');
+    const historyCanvas = document.getElementById('historyCanvas');
+    const hctx = historyCanvas.getContext('2d');
+    const runCount = document.getElementById('runCount');
+
+    // Materials
+    const materialsList = document.getElementById('materialsList');
+    const materialProfile = document.getElementById('materialProfile');
+    const structureCanvas = document.getElementById('structureCanvas');
+    const sctx = structureCanvas.getContext('2d');
+    const regen = document.getElementById('regen');
+    const exportMaterials = document.getElementById('exportMaterials');
+
+    // Vault elements
+    const camera = document.getElementById('camera');
+    const captureCanvas = document.getElementById('captureCanvas');
+    const startCam = document.getElementById('startCam');
+    const stopCam = document.getElementById('stopCam');
+    const snap = document.getElementById('snap');
+    const saveImage = document.getElementById('saveImage');
+    const upload = document.getElementById('upload');
+    const gallery = document.getElementById('gallery');
+    const clearVault = document.getElementById('clearVault');
+
+    let animationId = null;
+    let runs = [];
+    let stream = null;
+    let candidates = [];
+    let selectedId = null;
+
+    function computeOutputs() {
+      const p = +purity.value;
+      const t = +temp.value;
+      const pr = +pressure.value;
+      const it = +iterations.value;
+
+      const defect = Math.max(2, 26 - (p - 80) * 0.5 - (it * 0.05) + Math.abs(t - 620) * 0.012 + Math.abs(pr - 48) * 0.08);
+      const yieldVal = Math.min(98, 70 + (p - 80) * 0.45 + (it * 0.04) - Math.abs(t - 620) * 0.02);
+      const cost = 1.1 + (t / 900) * 0.7 + (it / 180) * 0.5 + (pr / 120) * 0.3;
+      const score = Math.max(0.4, Math.min(0.96, 1 - defect / 30));
+
+      defectEl.textContent = defect.toFixed(1) + '%';
+      yieldEl.textContent = yieldVal.toFixed(1) + '%';
+      costEl.textContent = '$' + cost.toFixed(2) + 'M';
+      scoreEl.textContent = score.toFixed(2);
+
+      return { defect, yieldVal, cost, score };
+    }
+
+    function drawSurface({ defect, yieldVal, score }) {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const gradient = ctx.createLinearGradient(0, 0, w, h);
+      gradient.addColorStop(0, 'rgba(126, 227, 255, 0.15)');
+      gradient.addColorStop(1, 'rgba(127, 244, 199, 0.12)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, w, h);
+
+      const grid = 18;
+      for (let y = 0; y < h; y += grid) {
+        for (let x = 0; x < w; x += grid) {
+          const noise = Math.sin((x + y) * 0.03 + defect) * 0.5 + Math.cos(y * 0.05) * 0.5;
+          const intensity = Math.max(0, Math.min(1, 0.5 + noise * 0.5));
+          ctx.fillStyle = `rgba(126, 227, 255, ${0.05 + intensity * 0.12})`;
+          ctx.fillRect(x, y, grid - 2, grid - 2);
+        }
+      }
+
+      const cx = w * 0.6;
+      const cy = h * 0.55;
+      const radius = 120 + (yieldVal - 70) * 2.2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 216, 111, 0.6)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(127, 244, 199, 0.18)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * score, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#eef2ff';
+      ctx.font = '16px Space Grotesk, sans-serif';
+      ctx.fillText('Defect Surface Map', 24, 32);
+      ctx.font = '12px IBM Plex Mono, monospace';
+      ctx.fillText(`Score: ${score.toFixed(2)}  |  Yield: ${yieldVal.toFixed(1)}%  |  Defect: ${defect.toFixed(1)}%`, 24, 54);
+    }
+
+    function drawHistory() {
+      const w = historyCanvas.width;
+      const h = historyCanvas.height;
+      hctx.clearRect(0, 0, w, h);
+      hctx.fillStyle = 'rgba(255,255,255,0.02)';
+      hctx.fillRect(0, 0, w, h);
+
+      hctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      for (let i = 0; i <= 5; i++) {
+        const y = 20 + (i * (h - 40)) / 5;
+        hctx.beginPath();
+        hctx.moveTo(30, y);
+        hctx.lineTo(w - 30, y);
+        hctx.stroke();
+      }
+
+      if (runs.length === 0) return;
+
+      const maxDefect = 25;
+      const maxYield = 100;
+
+      const plotLine = (key, color, maxVal) => {
+        hctx.strokeStyle = color;
+        hctx.lineWidth = 2;
+        hctx.beginPath();
+        runs.forEach((r, i) => {
+          const x = 30 + (i * (w - 60)) / Math.max(1, runs.length - 1);
+          const y = h - 20 - (r[key] / maxVal) * (h - 40);
+          if (i === 0) hctx.moveTo(x, y); else hctx.lineTo(x, y);
+        });
+        hctx.stroke();
+      };
+
+      plotLine('defect', '#ffb2b2', maxDefect);
+      plotLine('yieldVal', '#7ff4c7', maxYield);
+
+      hctx.fillStyle = '#a6b2c9';
+      hctx.font = '12px Space Grotesk, sans-serif';
+      hctx.fillText('Defect %', 36, 18);
+      hctx.fillStyle = '#7ff4c7';
+      hctx.fillText('Yield %', 110, 18);
+    }
+
+    function runOptimization() {
+      const result = computeOutputs();
+      drawSurface(result);
+      return result;
+    }
+
+    function animateSweep() {
+      let frame = 0;
+      const frames = 40;
+      if (animationId) cancelAnimationFrame(animationId);
+
+      const start = {
+        purity: +purity.value,
+        temp: +temp.value,
+        pressure: +pressure.value,
+        iterations: +iterations.value
+      };
+
+      const target = {
+        purity: Math.min(99, start.purity + 3),
+        temp: Math.max(480, start.temp - 40),
+        pressure: Math.max(20, start.pressure - 6),
+        iterations: Math.min(180, start.iterations + 20)
+      };
+
+      function step() {
+        const t = frame / frames;
+        purity.value = Math.round(start.purity + (target.purity - start.purity) * t);
+        temp.value = Math.round(start.temp + (target.temp - start.temp) * t);
+        pressure.value = Math.round(start.pressure + (target.pressure - start.pressure) * t);
+        iterations.value = Math.round(start.iterations + (target.iterations - start.iterations) * t);
+        runOptimization();
+        frame += 1;
+        if (frame <= frames) {
+          animationId = requestAnimationFrame(step);
+        }
+      }
+      step();
+    }
+
+    function reset() {
+      purity.value = 94;
+      temp.value = 620;
+      pressure.value = 48;
+      iterations.value = 80;
+      runOptimization();
+      generateCandidates();
+    }
+
+    function saveRun() {
+      const result = computeOutputs();
+      runs.push({
+        time: new Date().toISOString(),
+        purity: +purity.value,
+        temp: +temp.value,
+        pressure: +pressure.value,
+        iterations: +iterations.value,
+        defect: result.defect,
+        yieldVal: result.yieldVal,
+        cost: result.cost,
+        score: result.score
+      });
+      runCount.textContent = `${runs.length} saved`;
+      drawHistory();
+    }
+
+    function downloadCSV() {
+      if (runs.length === 0) return;
+      const headers = ['time','purity','temp','pressure','iterations','defect','yield','cost','score'];
+      const rows = runs.map(r => [r.time, r.purity, r.temp, r.pressure, r.iterations, r.defect.toFixed(2), r.yieldVal.toFixed(2), r.cost.toFixed(2), r.score.toFixed(3)]);
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nanovaris_ai_runs.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function seededRandom(seed) {
+      let x = Math.sin(seed) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function generateFormula(seed) {
+      const elems = ['Si', 'C', 'N', 'B', 'Al', 'Ti', 'W', 'Ta', 'Hf'];
+      const parts = [];
+      for (let i = 0; i < 4; i++) {
+        const idx = Math.floor(seededRandom(seed + i) * elems.length);
+        const frac = (seededRandom(seed + i + 1) * 0.35 + 0.1).toFixed(2);
+        parts.push(`${elems[idx]}${frac}`);
+      }
+      return parts.join('');
+    }
+
+    function generateCandidates() {
+      const base = +purity.value + +temp.value + +pressure.value + +iterations.value;
+      candidates = Array.from({ length: 5 }).map((_, i) => {
+        const seed = base + i * 19.7;
+        return {
+          id: `NV-${Math.floor(seededRandom(seed) * 9000 + 1000)}`,
+          formula: generateFormula(seed),
+          defect: Math.max(1.5, 14 - seededRandom(seed + 2) * 6),
+          yield: Math.min(98, 80 + seededRandom(seed + 3) * 12),
+          stability: Math.min(99, 85 + seededRandom(seed + 4) * 14),
+          thermal: Math.min(99, 78 + seededRandom(seed + 5) * 18),
+          score: Math.min(0.98, 0.6 + seededRandom(seed + 6) * 0.35)
+        };
+      });
+      renderCandidates();
+      selectCandidate(candidates[0]?.id);
+      populateCompare();
+    }
+
+    function renderCandidates() {
+      materialsList.innerHTML = '';
+      candidates.forEach(c => {
+        const div = document.createElement('div');
+        div.className = `material-card${selectedId === c.id ? ' active' : ''}`;
+        div.innerHTML = `<strong>${c.id}</strong><div class="muted" style="font-size:0.8rem;">${c.formula}</div>`;
+        div.addEventListener('click', () => selectCandidate(c.id));
+        materialsList.appendChild(div);
+      });
+    }
+
+    function selectCandidate(id) {
+      selectedId = id;
+      renderCandidates();
+      const c = candidates.find(x => x.id === id);
+      if (!c) return;
+      materialProfile.textContent = `ID: ${c.id}\nFormula: ${c.formula}\nPredicted Defect: ${c.defect.toFixed(2)}%\nProjected Yield: ${c.yield.toFixed(2)}%\nThermal Stability: ${c.thermal.toFixed(2)}%\nStructural Stability: ${c.stability.toFixed(2)}%\nAI Confidence: ${c.score.toFixed(2)}`;
+      drawStructure(c);
+    }
+
+    function drawStructure(c) {
+      const w = structureCanvas.width;
+      const h = structureCanvas.height;
+      sctx.clearRect(0, 0, w, h);
+      sctx.fillStyle = 'rgba(255,255,255,0.02)';
+      sctx.fillRect(0, 0, w, h);
+      const nodes = 28;
+      for (let i = 0; i < nodes; i++) {
+        const x = (i % 7) * 120 + 60;
+        const y = Math.floor(i / 7) * 60 + 50;
+        sctx.beginPath();
+        sctx.arc(x, y, 6 + (c.score * 4), 0, Math.PI * 2);
+        sctx.fillStyle = 'rgba(126, 227, 255, 0.6)';
+        sctx.fill();
+      }
+      sctx.strokeStyle = 'rgba(127, 244, 199, 0.35)';
+      for (let i = 0; i < nodes - 7; i++) {
+        const x1 = (i % 7) * 120 + 60;
+        const y1 = Math.floor(i / 7) * 60 + 50;
+        const x2 = ((i + 1) % 7) * 120 + 60;
+        const y2 = Math.floor((i + 1) / 7) * 60 + 50;
+        sctx.beginPath();
+        sctx.moveTo(x1, y1);
+        sctx.lineTo(x2, y2);
+        sctx.stroke();
+      }
+    }
+
+    [purity, temp, pressure, iterations].forEach(el => {
+      el.addEventListener('input', () => {
+        runOptimization();
+        generateCandidates();
+      });
+    });
+
+    runBtn.addEventListener('click', animateSweep);
+    resetBtn.addEventListener('click', reset);
+    saveBtn.addEventListener('click', saveRun);
+    downloadBtn.addEventListener('click', downloadCSV);
+    regen.addEventListener('click', generateCandidates);
+    exportMaterials.addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(candidates, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nanovaris_candidates.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    // Vault logic (localStorage)
+    function loadVault() {
+      const items = JSON.parse(localStorage.getItem('nanovaris_vault') || '[]');
+      gallery.innerHTML = '';
+      items.forEach((src) => {
+        const img = document.createElement('img');
+        img.src = src;
+        gallery.appendChild(img);
+      });
+    }
+
+    function saveToVault(dataUrl) {
+      const items = JSON.parse(localStorage.getItem('nanovaris_vault') || '[]');
+      items.unshift(dataUrl);
+      localStorage.setItem('nanovaris_vault', JSON.stringify(items.slice(0, 20)));
+      loadVault();
+    }
+
+    startCam.addEventListener('click', async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        camera.srcObject = stream;
+      } catch (e) {
+        alert('Camera access failed. Use Upload Image instead.');
+      }
+    });
+
+    stopCam.addEventListener('click', () => {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      camera.srcObject = null;
+    });
+
+    snap.addEventListener('click', () => {
+      const ctx2 = captureCanvas.getContext('2d');
+      captureCanvas.style.display = 'block';
+      ctx2.drawImage(camera, 0, 0, captureCanvas.width, captureCanvas.height);
+    });
+
+    saveImage.addEventListener('click', async () => {
+      const blob = await new Promise(resolve => captureCanvas.toBlob(resolve, 'image/png'));
+      if (!blob) return;
+      const resp = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'image/png',
+          'x-filename': `agreement-${Date.now()}.png`
+        },
+        body: blob
+      });
+      const data = await resp.json();
+      if (data.url) {
+        savePublic(data.url);
+      } else {
+        alert('Upload failed');
+      }
+    });
+
+    upload.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const resp = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': file.type,
+          'x-filename': file.name
+        },
+        body: file
+      });
+      const data = await resp.json();
+      if (data.url) {
+        savePublic(data.url);
+      } else {
+        alert('Upload failed');
+      }
+    });
+
+    clearVault.addEventListener('click', () => {
+      localStorage.removeItem('nanovaris_vault');
+      loadVault();
+    });
+
+
+    // Tabs highlight on scroll
+    const tabLinks = Array.from(document.querySelectorAll('.tab'));
+    const sections = tabLinks.map(t => document.querySelector(t.getAttribute('href'))).filter(Boolean);
+    const onScroll = () => {
+      let current = sections[0];
+      for (const s of sections) {
+        if (s.getBoundingClientRect().top < 120) current = s;
+      }
+      tabLinks.forEach(t => t.classList.toggle('active', t.getAttribute('href') === `#${current.id}`));
+    };
+    document.addEventListener('scroll', onScroll);
+    onScroll();
+
+    // ROI simulator
+    const annual = document.getElementById('annual');
+    const baseline = document.getElementById('baseline');
+    const lift = document.getElementById('lift');
+    const savings = document.getElementById('savings');
+    const roiGain = document.getElementById('roiGain');
+    const roiYield = document.getElementById('roiYield');
+    const roiSavings = document.getElementById('roiSavings');
+    const roiTotal = document.getElementById('roiTotal');
+
+    function calcROI() {
+      const annualVal = +annual.value; // in millions
+      const baseYield = +baseline.value / 100;
+      const liftVal = +lift.value / 100;
+      const newYield = Math.min(0.98, baseYield + liftVal);
+      const valueGain = (newYield - baseYield) * annualVal;
+      const costSave = annualVal * (+savings.value / 100);
+      roiGain.textContent = `$${valueGain.toFixed(1)}M`;
+      roiYield.textContent = `${(newYield * 100).toFixed(1)}%`;
+      roiSavings.textContent = `$${costSave.toFixed(1)}M`;
+      roiTotal.textContent = `$${(valueGain + costSave).toFixed(1)}M`;
+    }
+
+    [annual, baseline, lift, savings].forEach(el => el.addEventListener('input', calcROI));
+    calcROI();
+
+    // Pilot steps
+    const pilotSteps = document.querySelectorAll('#pilotSteps .step');
+    const pilotDetail = document.getElementById('pilotDetail');
+    pilotSteps.forEach(step => {
+      step.addEventListener('click', () => {
+        pilotSteps.forEach(s => s.classList.remove('active'));
+        step.classList.add('active');
+        pilotDetail.textContent = step.dataset.detail;
+      });
+    });
+
+    // Scenario switcher
+    const scenarioTabs = document.getElementById('scenarioTabs');
+    const scenarioText = document.getElementById('scenarioText');
+    const scenarioPresets = {
+      semis: { text: 'Active: Semiconductors — high yield sensitivity, strict defect thresholds.', annual: 1500, baseline: 82, lift: 14, savings: 6 },
+      robotics: { text: 'Active: Robotics — reliability focus and moderate volumes.', annual: 420, baseline: 78, lift: 10, savings: 5 },
+      datacenter: { text: 'Active: Data Centers — uptime critical, high heat loads.', annual: 900, baseline: 80, lift: 12, savings: 7 }
+    };
+    scenarioTabs.querySelectorAll('.scenario-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        scenarioTabs.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const p = scenarioPresets[btn.dataset.scope];
+        scenarioText.textContent = p.text;
+        if (annual) { annual.value = p.annual; baseline.value = p.baseline; lift.value = p.lift; savings.value = p.savings; calcROI(); }
+      });
+    });
+
+    // Diagnostics chart
+    const diagCanvas = document.getElementById('diagCanvas');
+    const dctx = diagCanvas.getContext('2d');
+    let diagPoints = Array.from({length: 50}).map((_,i)=>({x:i,y:Math.random()*0.3+0.6}));
+    function drawDiag(){
+      const w=diagCanvas.width,h=diagCanvas.height;
+      dctx.clearRect(0,0,w,h);
+      dctx.fillStyle='rgba(255,255,255,0.02)';
+      dctx.fillRect(0,0,w,h);
+      dctx.strokeStyle='rgba(255,255,255,0.12)';
+      for(let i=0;i<=4;i++){const y=20+(i*(h-40))/4; dctx.beginPath(); dctx.moveTo(20,y); dctx.lineTo(w-20,y); dctx.stroke();}
+      dctx.strokeStyle='#7ee3ff'; dctx.lineWidth=2; dctx.beginPath();
+      diagPoints.forEach((p,i)=>{const x=20+(i*(w-40))/(diagPoints.length-1); const y=h-20 - (p.y*(h-40)); if(i===0)dctx.moveTo(x,y); else dctx.lineTo(x,y);});
+      dctx.stroke();
+    }
+    function tickDiag(){
+      diagPoints = diagPoints.map((p,i)=>({x:i,y:Math.min(0.98, Math.max(0.4, p.y + (Math.random()-0.48)*0.02))}));
+      drawDiag();
+      requestAnimationFrame(tickDiag);
+    }
+    tickDiag();
+
+    // Explainability
+    const xaiText = document.getElementById('xaiText');
+    const xaiBtn = document.getElementById('xaiBtn');
+    xaiBtn.addEventListener('click', () => {
+      const r = computeOutputs();
+      xaiText.textContent = `Top Drivers
+- Purity: +${(purity.value-80)*0.9}% yield impact
+- Temp drift: ${(Math.abs(temp.value-620)*0.02).toFixed(2)}% defect risk
+- Pressure variance: ${(Math.abs(pressure.value-48)*0.06).toFixed(2)}% risk
+- Iterations: +${(iterations.value*0.04).toFixed(2)}% yield gain
+Confidence: ${r.score.toFixed(2)}`;
+    });
+
+    // Executive report modal
+    const reportModal = document.getElementById('reportModal');
+    const reportText = document.getElementById('reportText');
+    const reportBtn = document.getElementById('reportBtn');
+    const copyReport = document.getElementById('copyReport');
+    const closeReport = document.getElementById('closeReport');
+
+    reportBtn.addEventListener('click', () => {
+      const r = computeOutputs();
+      reportText.textContent = `Nanovaris AI Executive Snapshot
+Defect Rate: ${r.defect.toFixed(1)}%
+Projected Yield: ${r.yieldVal.toFixed(1)}%
+Batch Cost Impact: $${r.cost.toFixed(2)}M
+Confidence: ${r.score.toFixed(2)}
+Material Purity: ${purity.value}
+Temperature: ${temp.value} C
+Pressure: ${pressure.value} Pa
+Iterations: ${iterations.value}`;
+      reportModal.style.display='flex';
+    });
+    closeReport.addEventListener('click', ()=>reportModal.style.display='none');
+    copyReport.addEventListener('click', async ()=>{
+      await navigator.clipboard.writeText(reportText.textContent);
+    });
+
+    // Material comparison
+    const compareA = document.getElementById('compareA');
+    const compareB = document.getElementById('compareB');
+    const compareAText = document.getElementById('compareAText');
+    const compareBText = document.getElementById('compareBText');
+    const compareDelta = document.getElementById('compareDelta');
+
+    function populateCompare(){
+      [compareA, compareB].forEach(sel=>{ sel.innerHTML=''; candidates.forEach(c=>{ const o=document.createElement('option'); o.value=c.id; o.textContent=`${c.id} ${c.formula}`; sel.appendChild(o); }); });
+      if(candidates[0]) compareA.value=candidates[0].id;
+      if(candidates[1]) compareB.value=candidates[1].id;
+      updateCompare();
+    }
+
+    function formatCandidate(c){
+      return `ID: ${c.id}
+Formula: ${c.formula}
+Defect: ${c.defect.toFixed(2)}%
+Yield: ${c.yield.toFixed(2)}%
+Thermal: ${c.thermal.toFixed(2)}%
+Stability: ${c.stability.toFixed(2)}%
+Score: ${c.score.toFixed(2)}`;
+    }
+
+    function updateCompare(){
+      const a = candidates.find(c=>c.id===compareA.value);
+      const b = candidates.find(c=>c.id===compareB.value);
+      if(!a||!b) return;
+      compareAText.textContent = formatCandidate(a);
+      compareBText.textContent = formatCandidate(b);
+      compareDelta.textContent = `Delta (A - B)
+Defect: ${(a.defect-b.defect).toFixed(2)}%
+Yield: ${(a.yield-b.yield).toFixed(2)}%
+Thermal: ${(a.thermal-b.thermal).toFixed(2)}%
+Stability: ${(a.stability-b.stability).toFixed(2)}%
+Score: ${(a.score-b.score).toFixed(2)}`;
+    }
+
+    compareA.addEventListener('change', updateCompare);
+    compareB.addEventListener('change', updateCompare);
+
+    // Lab lattice editor
+    const labCanvas = document.getElementById('labCanvas');
+    const lctx = labCanvas.getContext('2d');
+    const impurity = document.getElementById('impurity');
+    const strain = document.getElementById('strain');
+    const defectMap = document.getElementById('defectMap');
+    const labDefect = document.getElementById('labDefect');
+    const labStability = document.getElementById('labStability');
+    const labThermal = document.getElementById('labThermal');
+    const labConfidence = document.getElementById('labConfidence');
+
+    const nodes = [];
+    const cols = 10, rows = 5;
+    for (let y=0; y<rows; y++) {
+      for (let x=0; x<cols; x++) {
+        nodes.push({ x: 70 + x*85, y: 50 + y*60, r: 7 });
+      }
+    }
+
+    let dragging = null;
+    labCanvas.addEventListener('mousedown', (e)=>{
+      const rect = labCanvas.getBoundingClientRect();
+      const mx = (e.clientX-rect.left) * (labCanvas.width/rect.width);
+      const my = (e.clientY-rect.top) * (labCanvas.height/rect.height);
+      nodes.forEach(n=>{ if(Math.hypot(n.x-mx,n.y-my) < 12) dragging=n; });
+    });
+    window.addEventListener('mouseup', ()=> dragging=null);
+    labCanvas.addEventListener('mousemove', (e)=>{
+      if(!dragging) return;
+      const rect = labCanvas.getBoundingClientRect();
+      dragging.x = (e.clientX-rect.left) * (labCanvas.width/rect.width);
+      dragging.y = (e.clientY-rect.top) * (labCanvas.height/rect.height);
+      drawLattice();
+    });
+
+    function computeLatticeMetrics(){
+      const imp = +impurity.value;
+      const str = +strain.value;
+      const noise = +defectMap.value;
+      let spacingVar = 0;
+      for (let i=0;i<nodes.length-1;i++) spacingVar += Math.abs(nodes[i].x - nodes[i+1].x)*0.0005;
+      const defect = Math.min(25, 4 + imp*0.6 + str*0.4 + noise*0.5 + spacingVar);
+      const stability = Math.max(70, 98 - defect*0.7);
+      const thermal = Math.max(65, 95 - (str*1.2 + imp*0.3));
+      const conf = Math.max(0.5, Math.min(0.95, 1 - defect/35));
+      return { defect, stability, thermal, conf };
+    }
+
+    function drawLattice(){
+      const w=labCanvas.width, h=labCanvas.height;
+      lctx.clearRect(0,0,w,h);
+      lctx.fillStyle='rgba(255,255,255,0.02)';
+      lctx.fillRect(0,0,w,h);
+      lctx.strokeStyle='rgba(126,227,255,0.25)';
+      nodes.forEach((n,i)=>{
+        const right = nodes[i+1];
+        if (right && (i+1)%cols !==0) {
+          lctx.beginPath(); lctx.moveTo(n.x,n.y); lctx.lineTo(right.x,right.y); lctx.stroke();
+        }
+        const down = nodes[i+cols];
+        if (down) { lctx.beginPath(); lctx.moveTo(n.x,n.y); lctx.lineTo(down.x,down.y); lctx.stroke(); }
+      });
+      const m = computeLatticeMetrics();
+      nodes.forEach(n=>{
+        lctx.beginPath();
+        lctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+        lctx.fillStyle='rgba(127,244,199,0.7)';
+        lctx.fill();
+      });
+      labDefect.textContent = m.defect.toFixed(1)+'%';
+      labStability.textContent = m.stability.toFixed(1)+'%';
+      labThermal.textContent = m.thermal.toFixed(1)+'%';
+      labConfidence.textContent = m.conf.toFixed(2);
+    }
+
+    [impurity, strain, defectMap].forEach(el=>el.addEventListener('input', drawLattice));
+    drawLattice();
+
+    // GNN visualization
+    const gnnCanvas = document.getElementById('gnnCanvas');
+    const gctx = gnnCanvas.getContext('2d');
+    const gNodes = Array.from({length: 18}).map((_,i)=>({x: 60 + (i%6)*120, y: 40 + Math.floor(i/6)*70, a: Math.random()}));
+
+    function drawGNN(){
+      const w=gnnCanvas.width, h=gnnCanvas.height;
+      gctx.clearRect(0,0,w,h);
+      gctx.fillStyle='rgba(255,255,255,0.02)';
+      gctx.fillRect(0,0,w,h);
+      gctx.strokeStyle='rgba(126,227,255,0.18)';
+      gNodes.forEach((n,i)=>{
+        gNodes.forEach((m,j)=>{ if(j>i && Math.random()<0.08){ gctx.beginPath(); gctx.moveTo(n.x,n.y); gctx.lineTo(m.x,m.y); gctx.stroke(); } });
+      });
+      gNodes.forEach(n=>{
+        n.a = Math.min(1, Math.max(0.1, n.a + (Math.random()-0.45)*0.08));
+        gctx.beginPath();
+        gctx.arc(n.x,n.y,8+n.a*6,0,Math.PI*2);
+        gctx.fillStyle = `rgba(126,227,255,${0.3+n.a*0.6})`;
+        gctx.fill();
+      });
+      requestAnimationFrame(drawGNN);
+    }
+    drawGNN();
+
+    // Hero particles
+    const heroParticles = document.getElementById('heroParticles');
+    const hctx2 = heroParticles.getContext('2d');
+    const particles = Array.from({length: 80}).map(() => ({x: Math.random()*heroParticles.width, y: Math.random()*heroParticles.height, vx: (Math.random()-0.5)*0.6, vy: (Math.random()-0.5)*0.6}));
+    function drawParticles(){
+      const w=heroParticles.width,h=heroParticles.height;
+      hctx2.clearRect(0,0,w,h);
+      hctx2.fillStyle='rgba(126,227,255,0.15)';
+      particles.forEach(p=>{
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0||p.x>w) p.vx*=-1;
+        if(p.y<0||p.y>h) p.vy*=-1;
+        hctx2.beginPath(); hctx2.arc(p.x,p.y,2.2,0,Math.PI*2); hctx2.fill();
+      });
+      requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+
+    // Ensemble studio
+    const wGNN = document.getElementById('wGNN');
+    const wDiff = document.getElementById('wDiff');
+    const wBayes = document.getElementById('wBayes');
+    const ensembleCanvas = document.getElementById('ensembleCanvas');
+    const ectx = ensembleCanvas.getContext('2d');
+
+    function drawEnsemble(){
+      const w=ensembleCanvas.width,h=ensembleCanvas.height;
+      ectx.clearRect(0,0,w,h);
+      ectx.fillStyle='rgba(255,255,255,0.02)';
+      ectx.fillRect(0,0,w,h);
+      const total = (+wGNN.value + +wDiff.value + +wBayes.value) || 1;
+      const g = +wGNN.value/total, d=+wDiff.value/total, b=+wBayes.value/total;
+      const bars = [g,d,b];
+      const colors = ['#7ee3ff','#ffd86f','#7ff4c7'];
+      bars.forEach((v,i)=>{
+        const x=80+i*220; const barH=v*(h-60);
+        ectx.fillStyle=colors[i];
+        ectx.fillRect(x, h-30-barH, 120, barH);
+      });
+      const ensembleBoost = (g*0.4 + d*0.35 + b*0.25);
+      scoreEl.textContent = (Math.min(0.98, (+scoreEl.textContent || 0.78) + ensembleBoost*0.05)).toFixed(2);
+    }
+    [wGNN,wDiff,wBayes].forEach(el=>el.addEventListener('input', ()=>{ drawEnsemble(); runOptimization(); }));
+    drawEnsemble();
+
+    // Init after compare elements exist
+    runOptimization();
+    drawHistory();
+    loadVault();
+    generateCandidates();
+
+    // Training dashboard
+    const trainCanvas = document.getElementById('trainCanvas');
+    const tctx = trainCanvas.getContext('2d');
+    const gpu = document.getElementById('gpu');
+    const vr = document.getElementById('vr');
+    const queue = document.getElementById('queue');
+    const batch = document.getElementById('batch');
+    let loss = Array.from({length: 60}, (_,i)=> 1.2 - i*0.01 + Math.random()*0.05);
+    let acc = Array.from({length: 60}, (_,i)=> 0.6 + i*0.005 + Math.random()*0.02);
+
+    function drawTraining(){
+      const w=trainCanvas.width, h=trainCanvas.height;
+      tctx.clearRect(0,0,w,h);
+      tctx.fillStyle='rgba(255,255,255,0.02)'; tctx.fillRect(0,0,w,h);
+      tctx.strokeStyle='rgba(255,255,255,0.12)';
+      for(let i=0;i<=4;i++){const y=20+(i*(h-40))/4; tctx.beginPath(); tctx.moveTo(20,y); tctx.lineTo(w-20,y); tctx.stroke();}
+      const plot=(arr,color)=>{tctx.strokeStyle=color; tctx.lineWidth=2; tctx.beginPath(); arr.forEach((v,i)=>{const x=20+(i*(w-40))/(arr.length-1); const y=h-20 - v*(h-40); if(i===0)tctx.moveTo(x,y); else tctx.lineTo(x,y);}); tctx.stroke();};
+      plot(loss.map(v=>Math.max(0.1, v)), '#ffb2b2');
+      plot(acc.map(v=>Math.min(0.98, v)), '#7ff4c7');
+    }
+
+    function tickTraining(){
+      loss.shift(); acc.shift();
+            loss.push(Math.max(0.1, loss[loss.length-1] - Math.random()*0.02 + 0.01));
+      acc.push(Math.min(0.98, acc[acc.length-1] + Math.random()*0.01));
+      drawTraining();
+      gpu.textContent = `${Math.floor(65+Math.random()*30)}%`;
+      vr.textContent = `${(12+Math.random()*4).toFixed(1)} GB`;
+      queue.textContent = `${Math.floor(10+Math.random()*30)}`;
+      batch.textContent = (0.85+Math.random()*0.12).toFixed(2);
+      requestAnimationFrame(tickTraining);
+    }
+    drawTraining();
+    requestAnimationFrame(tickTraining);
+
+    // Pitch mode
+    const pitchBtn = document.getElementById('pitchBtn');
+    let pitchOn = false;
+    let pitchIdx = 0;
+    const pitchSections = ['engine','demo','training','materials','lab','scenario','diagnostics','compare','roi','pilot','compliance'];
+    function highlightSection(id){
+      document.querySelectorAll('section').forEach(s=>s.classList.remove('spotlight'));
+      const el = document.getElementById(id);
+      if(el){ el.classList.add('spotlight'); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    }
+    pitchBtn.addEventListener('click', ()=>{
+      pitchOn = !pitchOn;
+      pitchBtn.textContent = pitchOn ? 'Stop Pitch' : 'Pitch Mode';
+      if(pitchOn){ pitchIdx=0; highlightSection(pitchSections[pitchIdx]); }
+      else { document.querySelectorAll('section').forEach(s=>s.classList.remove('spotlight')); }
+    });
+    setInterval(()=>{ if(!pitchOn) return; pitchIdx=(pitchIdx+1)%pitchSections.length; highlightSection(pitchSections[pitchIdx]); }, 7000);
+
+    // Smooth scroll for nav + tabs to align to top
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const id = link.getAttribute('href');
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Spectral Lab
+    const spectralCanvas = document.getElementById('spectralCanvas');
+    const spctx = spectralCanvas.getContext('2d');
+    const phaseCanvas = document.getElementById('phaseCanvas');
+    const phctx = phaseCanvas.getContext('2d');
+    const dopant = document.getElementById('dopant');
+    const grain = document.getElementById('grain');
+    const temp2 = document.getElementById('temp2');
+    const cool = document.getElementById('cool');
+
+    function drawSpectral() {
+      const w = spectralCanvas.width, h = spectralCanvas.height;
+      spctx.clearRect(0,0,w,h);
+      spctx.fillStyle='rgba(255,255,255,0.02)'; spctx.fillRect(0,0,w,h);
+      spctx.strokeStyle='rgba(255,255,255,0.12)';
+      for(let i=0;i<=4;i++){const y=20+(i*(h-40))/4; spctx.beginPath(); spctx.moveTo(20,y); spctx.lineTo(w-20,y); spctx.stroke();}
+      spctx.strokeStyle='#7ee3ff'; spctx.lineWidth=2; spctx.beginPath();
+      const d = +dopant.value, g = +grain.value;
+      for(let i=0;i<120;i++){
+        const x = 20 + i*(w-40)/119;
+        const base = Math.exp(-Math.pow((i-50)/20,2));
+        const peak = Math.exp(-Math.pow((i-80)/15,2));
+        const yv = (base*(0.4+d/30)+peak*(0.3+g/100));
+        const y = h-20 - yv*(h-40);
+        if(i===0) spctx.moveTo(x,y); else spctx.lineTo(x,y);
+      }
+      spctx.stroke();
+    }
+
+    function drawPhase() {
+      const w = phaseCanvas.width, h = phaseCanvas.height;
+      phctx.clearRect(0,0,w,h);
+      const t = +temp2.value;
+      const c = +cool.value;
+      for (let y=0; y<h; y+=8) {
+        for (let x=0; x<w; x+=8) {
+          const stability = Math.sin((x+t)*0.01) + Math.cos((y+c)*0.02);
+          const v = (stability+2)/4;
+          phctx.fillStyle = `rgba(127,244,199,${0.15+v*0.5})`;
+          phctx.fillRect(x,y,7,7);
+        }
+      }
+      phctx.strokeStyle='rgba(255,255,255,0.12)';
+      phctx.strokeRect(10,10,w-20,h-20);
+    }
+
+    [dopant, grain].forEach(el=>el.addEventListener('input', drawSpectral));
+    [temp2, cool].forEach(el=>el.addEventListener('input', drawPhase));
+    drawSpectral(); drawPhase();
+
+    // Public Gallery
+    const publicUrl = document.getElementById('publicUrl');
+    const addPublic = document.getElementById('addPublic');
+    const publicGallery = document.getElementById('publicGallery');
+    const exportVault = document.getElementById('exportVault');
+    const importVault = document.getElementById('importVault');
+    const importFile = document.getElementById('importFile');
+
+    async function loadPublic(){
+      publicGallery.innerHTML='';
+      try {
+        const resp = await fetch('/api/list');
+        const data = await resp.json();
+        const items = data.urls || [];
+        items.forEach(src=>{ const img=document.createElement('img'); img.src=src; publicGallery.appendChild(img); });
+      } catch (e) {
+        // fallback to local cache
+        const items = JSON.parse(localStorage.getItem('nanovaris_public') || '[]');
+        items.forEach(src=>{ const img=document.createElement('img'); img.src=src; publicGallery.appendChild(img); });
+      }
+    }
+    function savePublic(src){
+      const items = JSON.parse(localStorage.getItem('nanovaris_public') || '[]');
+      items.unshift(src); localStorage.setItem('nanovaris_public', JSON.stringify(items.slice(0,20)));
+      loadPublic();
+    }
+
+    const refreshPublic = document.getElementById('refreshPublic');
+    refreshPublic.addEventListener('click', loadPublic);
+
+    exportVault.addEventListener('click', ()=>{
+      const data = { private: JSON.parse(localStorage.getItem('nanovaris_vault')||'[]'), public: JSON.parse(localStorage.getItem('nanovaris_public')||'[]') };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='nanovaris_vault.json'; a.click(); URL.revokeObjectURL(a.href);
+    });
+    importVault.addEventListener('click', ()=>importFile.click());
+    importFile.addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader=new FileReader(); reader.onload=()=>{
+        try{ const data=JSON.parse(reader.result); if(data.private) localStorage.setItem('nanovaris_vault', JSON.stringify(data.private)); if(data.public) localStorage.setItem('nanovaris_public', JSON.stringify(data.public)); loadVault(); loadPublic(); }catch{}
+      }; reader.readAsText(file);
+    });
+    loadPublic();
+
+    // 3D Lattice Viewer (CPU-based, reliable)
+    const webglCanvas = document.getElementById('webglCanvas');
+    const w2d = webglCanvas.getContext('2d');
+    const spin = document.getElementById('spin');
+    const density = document.getElementById('density');
+    const bond = document.getElementById('bond');
+
+    let lattice = [];
+    function buildLattice(n){
+      lattice = [];
+      const dim = Math.ceil(Math.cbrt(n));
+      for (let z=0; z<dim; z++) {
+        for (let y=0; y<dim; y++) {
+          for (let x=0; x<dim; x++) {
+            const px = (x/(dim-1)-0.5)*2;
+            const py = (y/(dim-1)-0.5)*2;
+            const pz = (z/(dim-1)-0.5)*2;
+            lattice.push({x:px,y:py,z:pz});
+            if (lattice.length >= n) return;
+          }
+        }
+      }
+    }
+    buildLattice(+density.value);
+
+    function project(p, angle){
+      const rx = angle*0.7, ry = angle;
+      let x = p.x*Math.cos(ry) + p.z*Math.sin(ry);
+      let z = -p.x*Math.sin(ry) + p.z*Math.cos(ry);
+      let y = p.y*Math.cos(rx) - z*Math.sin(rx);
+      z = p.y*Math.sin(rx) + z*Math.cos(rx);
+      const scale = 160/(z+3.2);
+      return {x: x*scale, y: y*scale, z};
+    }
+
+    function resize2d(){
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const w = Math.max(1, Math.floor(webglCanvas.clientWidth * dpr));
+      const h = Math.max(1, Math.floor(webglCanvas.clientHeight * dpr));
+      if (webglCanvas.width !== w || webglCanvas.height !== h) {
+        webglCanvas.width = w; webglCanvas.height = h;
+      }
+    }
+
+    function draw3d(){
+      resize2d();
+      const w = webglCanvas.width, h = webglCanvas.height;
+      w2d.clearRect(0,0,w,h);
+      w2d.fillStyle = 'rgba(10,16,28,0.95)';
+      w2d.fillRect(0,0,w,h);
+
+      const angle = performance.now()*0.001*(+spin.value/10);
+      const pts = lattice.map(p=>project(p, angle));
+      const centerX = w/2, centerY = h/2;
+
+      const maxDist = (11-+bond.value) * 0.6;
+      w2d.strokeStyle = 'rgba(126,227,255,0.22)';
+      for (let i=0;i<pts.length;i++){
+        for (let j=i+1;j<pts.length;j++){
+          const dx = pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y, dz=pts[i].z-pts[j].z;
+          const d = Math.sqrt(dx*dx+dy*dy+dz*dz);
+          if (d < maxDist){
+            w2d.beginPath();
+            w2d.moveTo(centerX+pts[i].x, centerY+pts[i].y);
+            w2d.lineTo(centerX+pts[j].x, centerY+pts[j].y);
+            w2d.stroke();
+          }
+        }
+      }
+
+      for (const p of pts){
+        const r = 2.4 + (1.8 - p.z*0.25);
+        w2d.beginPath();
+        w2d.arc(centerX+p.x, centerY+p.y, r, 0, Math.PI*2);
+        w2d.fillStyle = 'rgba(126,227,255,0.95)';
+        w2d.fill();
+      }
+
+      requestAnimationFrame(draw3d);
+    }
+    draw3d();
+
+    density.addEventListener('input', ()=>{ buildLattice(+density.value); });
+
+    // Chatbot (local demo)
+    const chatLog = document.getElementById('chatLog');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+
+    function addBubble(text, cls){
+      const div = document.createElement('div');
+      div.className = `bubble ${cls}`;
+      div.textContent = text;
+      chatLog.appendChild(div);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function botReply(q){
+      const r = computeOutputs();
+      const lower = q.toLowerCase();
+      if (lower.includes('yield')) return `Projected yield from current settings: ${r.yieldVal.toFixed(1)}%.`;
+      if (lower.includes('defect')) return `Predicted defect rate: ${r.defect.toFixed(1)}%.`;
+      if (lower.includes('cost')) return `Estimated batch cost impact: $${r.cost.toFixed(2)}M.`;
+      if (lower.includes('pilot')) return 'Pilot flow: baseline diagnostic → candidate generation → synthesis/QA → ROI report.';
+      if (lower.includes('roi')) return 'Use the ROI Simulator to quantify value; it updates in real time.';
+      if (lower.includes('materials')) return `Top candidate: ${candidates[0]?.id || 'N/A'} with confidence ${candidates[0]?.score?.toFixed(2) || 'N/A'}.`;
+      if (lower.includes('how') || lower.includes('what')) return 'This demo simulates AI‑guided materials optimization using multi‑objective scoring and live visualization.';
+      return 'I can answer about yield, defects, cost, ROI, pilots, and materials. Try: "What is the defect rate?"';
+    }
+
+    function handleChat(){
+      const q = chatInput.value.trim();
+      if (!q) return;
+      addBubble(q, 'user');
+      addBubble(botReply(q), 'bot');
+      chatInput.value = '';
+    }
+
+    chatSend.addEventListener('click', handleChat);
+    chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') handleChat(); });
+
+    addBubble('Hi! Ask me about yield, defects, ROI, pilots, or materials.', 'bot');
+  </script>
+</body>
+</html>
